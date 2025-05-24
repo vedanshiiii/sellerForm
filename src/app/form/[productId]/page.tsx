@@ -1,11 +1,14 @@
 import { Toaster } from 'react-hot-toast';
 import SellerForm from '@/components/SellerForm';
 
-type Props = {
-  params: { productId: string }
-};
+interface PageProps {
+  params: {
+    productId: string;
+  };
+  searchParams: { [key: string]: string | string[] | undefined };
+}
 
-export default async function Page({ params }: Props) {
+export default function Page({ params }: PageProps) {
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
