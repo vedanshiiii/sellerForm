@@ -3,12 +3,7 @@
 import { Toaster } from 'react-hot-toast';
 import SellerForm from '@/components/SellerForm';
 
-interface PageProps {
-  params: { productId: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
-}
-
-export default function Page({ params }: PageProps) {
+export default function Page({ params }: { params: { productId: string } }) {
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
