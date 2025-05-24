@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
@@ -159,10 +159,11 @@ export default function SellerForm() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [customQuestions, setCustomQuestions] = useState([
-    { text: '', options: [''] },
-    { text: '', options: [''] },
-    { text: '', options: [''] },
+    { id: 'cq-0', text: '', options: [{ id: 'cq-0-o-0', text: '' }] },
+    { id: 'cq-1', text: '', options: [{ id: 'cq-1-o-0', text: '' }] },
+    { id: 'cq-2', text: '', options: [{ id: 'cq-2-o-0', text: '' }] },
   ]);
+  const customQuestionCounter = useRef(3);
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean;
     type: 'question' | 'option';
@@ -218,7 +219,7 @@ export default function SellerForm() {
   const updateCustomOption = (qIdx: number, oIdx: number, value: string) => {
     setCustomQuestions(prev => {
       const updated = [...prev];
-      updated[qIdx].options[oIdx] = value;
+      updated[qIdx].options[oIdx].text = value;
       return updated;
     });
   };
@@ -226,13 +227,19 @@ export default function SellerForm() {
   const addCustomOption = (qIdx: number) => {
     setCustomQuestions(prev => {
       const updated = [...prev];
-      updated[qIdx].options.push('');
+      const optionIdx = updated[qIdx].options.length;
+      updated[qIdx].options.push({ id: `${updated[qIdx].id}-o-${optionIdx}`, text: '' });
       return updated;
     });
   };
 
   const addCustomQuestion = () => {
-    setCustomQuestions(prev => ([...prev, { text: '', options: [''] }]));
+    const idx = customQuestionCounter.current;
+    setCustomQuestions(prev => ([
+      ...prev,
+      { id: `cq-${idx}`, text: '', options: [{ id: `cq-${idx}-o-0`, text: '' }] }
+    ]));
+    customQuestionCounter.current += 1;
   };
 
   const onSubmit = (data: FormData) => {
@@ -300,7 +307,7 @@ export default function SellerForm() {
         <div className="bg-white shadow rounded-lg p-6 space-y-4">
           <h3 className="text-lg font-medium text-gray-900 mb-2">Custom Seller Questions</h3>
           {customQuestions.map((question, idx) => (
-            <div key={idx} className="mb-4">
+            <div key={question.id} className="mb-4">
               <label className="block text-gray-700 mb-1">Custom Question {idx + 1}</label>
               <input
                 type="text"
@@ -313,9 +320,9 @@ export default function SellerForm() {
                 <label className="block text-gray-600 mb-1">Options</label>
                 {question.options.map((option, oIdx) => (
                   <input
-                    key={oIdx}
+                    key={option.id}
                     type="text"
-                    value={option}
+                    value={option.text}
                     onChange={(e) => updateCustomOption(idx, oIdx, e.target.value)}
                     placeholder={`Option ${oIdx + 1}`}
                     className="w-full h-10 rounded-md border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 text-black placeholder-gray-400 mb-1"
