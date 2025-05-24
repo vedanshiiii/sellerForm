@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react';
+"use client"; 
+import { useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
@@ -158,12 +159,6 @@ const SAMPLE_QUESTIONS: Record<string, Question[]> = {
 export default function SellerForm() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [customQuestions, setCustomQuestions] = useState([
-    { id: 'cq-0', text: '', options: [{ id: 'cq-0-o-0', text: '' }] },
-    { id: 'cq-1', text: '', options: [{ id: 'cq-1-o-0', text: '' }] },
-    { id: 'cq-2', text: '', options: [{ id: 'cq-2-o-0', text: '' }] },
-  ]);
-  const customQuestionCounter = useRef(3);
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean;
     type: 'question' | 'option';
@@ -176,7 +171,7 @@ export default function SellerForm() {
     itemText: '',
   });
 
-  const { handleSubmit } = useForm<FormData>();
+  const { handleSubmit, register } = useForm<FormData>();
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
@@ -206,40 +201,6 @@ export default function SellerForm() {
       })));
     }
     toast.success('Feedback saved successfully!');
-  };
-
-  const updateCustomQuestion = (index: number, text: string) => {
-    setCustomQuestions(prev => {
-      const updated = [...prev];
-      updated[index].text = text;
-      return updated;
-    });
-  };
-
-  const updateCustomOption = (qIdx: number, oIdx: number, value: string) => {
-    setCustomQuestions(prev => {
-      const updated = [...prev];
-      updated[qIdx].options[oIdx].text = value;
-      return updated;
-    });
-  };
-
-  const addCustomOption = (qIdx: number) => {
-    setCustomQuestions(prev => {
-      const updated = [...prev];
-      const optionIdx = updated[qIdx].options.length;
-      updated[qIdx].options.push({ id: `${updated[qIdx].id}-o-${optionIdx}`, text: '' });
-      return updated;
-    });
-  };
-
-  const addCustomQuestion = () => {
-    const idx = customQuestionCounter.current;
-    setCustomQuestions(prev => ([
-      ...prev,
-      { id: `cq-${idx}`, text: '', options: [{ id: `cq-${idx}-o-0`, text: '' }] }
-    ]));
-    customQuestionCounter.current += 1;
   };
 
   const onSubmit = (data: FormData) => {
@@ -303,48 +264,32 @@ export default function SellerForm() {
           </div>
         ))}
 
-        {/* Custom Questions */}
+        {/* Static Custom Questions */}
         <div className="bg-white shadow rounded-lg p-6 space-y-4">
           <h3 className="text-lg font-medium text-gray-900 mb-2">Custom Seller Questions</h3>
-          {customQuestions.map((question, idx) => (
-            <div key={question.id} className="mb-4">
-              <label className="block text-gray-700 mb-1">Custom Question {idx + 1}</label>
+          {[0, 1, 2].map((qIdx) => (
+            <div key={qIdx} className="mb-4">
+              <label className="block text-gray-700 mb-1">Custom Question {qIdx + 1}</label>
               <input
                 type="text"
-                value={question.text}
-                onChange={(e) => updateCustomQuestion(idx, e.target.value)}
+                {...register(`customQuestions.${qIdx}.text` as const)}
                 placeholder="e.g., What specific use case do you have for this product?"
                 className="w-full h-14 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-4 text-black placeholder-gray-400 mb-2"
               />
               <div className="ml-2">
                 <label className="block text-gray-600 mb-1">Options</label>
-                {question.options.map((option, oIdx) => (
+                {[0, 1, 2].map((oIdx) => (
                   <input
-                    key={option.id}
+                    key={oIdx}
                     type="text"
-                    value={option.text}
-                    onChange={(e) => updateCustomOption(idx, oIdx, e.target.value)}
+                    {...register(`customQuestions.${qIdx}.options.${oIdx}.text` as const)}
                     placeholder={`Option ${oIdx + 1}`}
                     className="w-full h-10 rounded-md border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 text-black placeholder-gray-400 mb-1"
                   />
                 ))}
-                <button
-                  type="button"
-                  onClick={() => addCustomOption(idx)}
-                  className="mt-1 text-indigo-600 hover:underline text-sm"
-                >
-                  + Add Option
-                </button>
               </div>
             </div>
           ))}
-          <button
-            type="button"
-            onClick={addCustomQuestion}
-            className="w-full mt-2 py-2 border border-indigo-200 rounded-md text-indigo-700 bg-indigo-50 hover:bg-indigo-100 text-base font-medium"
-          >
-            + Add Another Question
-          </button>
         </div>
 
         {/* Submit Button */}

@@ -15,6 +15,7 @@ export interface Option {
 export interface CustomQuestion {
   id: string;
   text: string;
+  options: { text: string }[];
 }
 
 export interface FormData {
