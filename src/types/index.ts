@@ -7,15 +7,15 @@ export interface Question {
 }
 
 export interface Option {
-  id: string;
+  id?: string;
   text: string;
   feedback?: string;
 }
 
 export interface CustomQuestion {
-  id: string;
+  id?: string;
   text: string;
-  options: { text: string }[];
+  options: { id?: string; text: string }[];
 }
 
 export interface FormData {

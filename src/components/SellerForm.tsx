@@ -1,10 +1,12 @@
 "use client"; 
 import { useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import { Question, FormData } from '@/types';
 import FeedbackModal from './FeedbackModal';
+
+const generateId = () => Math.random().toString(36).substr(2, 9);
 
 const CATEGORIES = ['Electronics', 'Fashion', 'Home & Kitchen', 'Sports'];
 
@@ -159,6 +161,7 @@ const SAMPLE_QUESTIONS: Record<string, Question[]> = {
 export default function SellerForm() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [localOptions, setLocalOptions] = useState<Record<string, Array<{ id?: string; text: string }>>>({});
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean;
     type: 'question' | 'option';
@@ -171,7 +174,61 @@ export default function SellerForm() {
     itemText: '',
   });
 
-  const { handleSubmit, register } = useForm<FormData>();
+  const { handleSubmit, register, control, setValue, getValues } = useForm<FormData>({
+    defaultValues: {
+      customQuestions: [
+        { id: generateId(), text: '', options: [{ id: generateId(), text: '' }] },
+      ],
+    },
+  });
+
+  // Dynamic custom questions
+  const {
+    fields: customQuestionsFields,
+    append: appendCustomQuestion,
+    remove: removeCustomQuestion,
+  } = useFieldArray({
+    control,
+    name: 'customQuestions',
+  });
+
+  // Add option to a custom question
+  const handleAddOption = (qIdx: number) => {
+    const questionId = getValues(`customQuestions.${qIdx}.id`) as string;
+    const newOption = { id: generateId(), text: '' };
+    const currentOptions = localOptions[questionId] || getValues(`customQuestions.${qIdx}.options`) || [];
+    const updatedOptions = [...currentOptions, newOption];
+    
+    // Update local state
+    setLocalOptions(prev => ({
+      ...prev,
+      [questionId]: updatedOptions
+    }));
+    
+    // Update form state
+    setValue(`customQuestions.${qIdx}.options`, updatedOptions, {
+      shouldValidate: false,
+      shouldDirty: true
+    });
+  };
+
+  // Remove option from a custom question
+  const handleRemoveOption = (qIdx: number, oIdx: number) => {
+    const questionId = getValues(`customQuestions.${qIdx}.id`) as string;
+    const currentOptions = localOptions[questionId] || getValues(`customQuestions.${qIdx}.options`) || [];
+    const updatedOptions = currentOptions.filter((_: unknown, idx: number) => idx !== oIdx);
+    
+    // Update local state
+    setLocalOptions(prev => ({
+      ...prev,
+      [questionId]: updatedOptions
+    }));
+    
+    // Update form state
+    setValue(`customQuestions.${qIdx}.options`, updatedOptions, {
+      shouldValidate: false
+    });
+  };
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
@@ -252,7 +309,7 @@ export default function SellerForm() {
                     <span className="text-gray-700">{option.text}</span>
                     <button
                       type="button"
-                      onClick={() => handleFeedback('option', option.id, option.text)}
+                      onClick={() => handleFeedback('option', String(option.id || ''), option.text)}
                       className="text-gray-400 hover:text-gray-500"
                     >
                       <XMarkIcon className="h-5 w-5" />
@@ -264,32 +321,69 @@ export default function SellerForm() {
           </div>
         ))}
 
-        {/* Static Custom Questions */}
+        {/* Dynamic Custom Questions */}
         <div className="bg-white shadow rounded-lg p-6 space-y-4">
           <h3 className="text-lg font-medium text-gray-900 mb-2">Custom Seller Questions</h3>
-          {[0, 1, 2].map((qIdx) => (
-            <div key={qIdx} className="mb-4">
-              <label className="block text-gray-700 mb-1">Custom Question {qIdx + 1}</label>
-              <input
-                type="text"
-                {...register(`customQuestions.${qIdx}.text` as const)}
-                placeholder="e.g., What specific use case do you have for this product?"
-                className="w-full h-14 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-4 text-black placeholder-gray-400 mb-2"
-              />
-              <div className="ml-2">
-                <label className="block text-gray-600 mb-1">Options</label>
-                {[0, 1, 2].map((oIdx) => (
-                  <input
-                    key={oIdx}
-                    type="text"
-                    {...register(`customQuestions.${qIdx}.options.${oIdx}.text` as const)}
-                    placeholder={`Option ${oIdx + 1}`}
-                    className="w-full h-10 rounded-md border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 text-black placeholder-gray-400 mb-1"
-                  />
-                ))}
+          {customQuestionsFields.map((q, qIdx) => {
+            const questionId = getValues(`customQuestions.${qIdx}.id`) as string;
+            const options = localOptions[questionId] || getValues(`customQuestions.${qIdx}.options`) || [];
+            return (
+              <div key={q.id} className="mb-4 border-b pb-4">
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-gray-700">Custom Question {qIdx + 1}</label>
+                  {customQuestionsFields.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeCustomQuestion(qIdx)}
+                      className="text-red-500 hover:underline text-xs ml-2"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+                <input
+                  type="text"
+                  {...register(`customQuestions.${qIdx}.text` as const)}
+                  placeholder="e.g., What specific use case do you have for this product?"
+                  className="w-full h-14 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-4 text-black placeholder-gray-400 mb-2"
+                />
+                <div className="ml-2">
+                  <label className="block text-gray-600 mb-1">Options</label>
+                  {options.map((opt: { id?: string; text: string }, oIdx: number) => (
+                    <div key={opt.id || oIdx} className="flex items-center mb-1">
+                      <input
+                        type="text"
+                        {...register(`customQuestions.${qIdx}.options.${oIdx}.text` as const)}
+                        placeholder={`Option ${oIdx + 1}`}
+                        className="w-full h-10 rounded-md border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 text-black placeholder-gray-400"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleFeedback('option', String(opt.id || ''), opt.text)}
+                        className="text-gray-400 hover:text-gray-500 ml-2"
+                      >
+                        <XMarkIcon className="h-5 w-5" />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => handleAddOption(qIdx)}
+                    className="text-indigo-600 hover:underline text-xs mt-1"
+                  >
+                    + Add Option
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => appendCustomQuestion({ id: generateId(), text: '', options: [{ id: generateId(), text: '' }] })}
+            className="w-full mt-2 py-2 border border-dashed border-indigo-400 rounded-md text-indigo-600 hover:bg-indigo-50 text-sm font-medium"
+          >
+            + Add Another Question
+          </button>
         </div>
 
         {/* Submit Button */}
