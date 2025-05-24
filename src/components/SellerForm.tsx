@@ -226,20 +226,18 @@ export default function SellerForm() {
     });
   };
 
-  const handleFeedbackSubmit = (feedback: string) => {
+  const handleFeedbackSubmit = () => {
     if (feedbackModal.type === 'question') {
-      setQuestions(questions.map(q =>
-        q.id === feedbackModal.itemId ? { ...q, feedback } : q
-      ));
+      // Remove question
+      setQuestions(questions.filter(q => q.id !== feedbackModal.itemId));
     } else {
+      // Remove option
       setQuestions(questions.map(q => ({
         ...q,
-        options: q.options?.map(o =>
-          o.id === feedbackModal.itemId ? { ...o, feedback } : o
-        ),
+        options: q.options?.filter(o => o.id !== feedbackModal.itemId)
       })));
     }
-    toast.success('Feedback saved successfully!');
+    toast.success('Item removed successfully!');
   };
 
   const onSubmit = (data: FormData) => {
@@ -339,13 +337,6 @@ export default function SellerForm() {
                         placeholder={`Option ${oIdx + 1}`}
                         className="w-full h-10 rounded-md border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-base px-3 text-black placeholder-gray-400"
                       />
-                      <button
-                        type="button"
-                        onClick={() => handleFeedback('option', String(opt.id || ''), opt.text)}
-                        className="text-gray-400 hover:text-gray-500 ml-2"
-                      >
-                        <XMarkIcon className="h-5 w-5" />
-                      </button>
                     </div>
                   ))}
                   <button
