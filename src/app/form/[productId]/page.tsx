@@ -1,5 +1,3 @@
-'use client';
-
 import { Toaster } from 'react-hot-toast';
 import SellerForm from '@/components/SellerForm';
 
