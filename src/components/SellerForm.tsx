@@ -5,33 +5,9 @@ import { toast } from 'react-hot-toast';
 import { Question, FormData } from '@/types';
 import FeedbackModal from './FeedbackModal';
 
-const CATEGORIES = ['AMCAT', 'Electronics', 'Fashion', 'Home & Kitchen', 'Sports'];
+const CATEGORIES = ['Electronics', 'Fashion', 'Home & Kitchen', 'Sports'];
 
 const SAMPLE_QUESTIONS: Record<string, Question[]> = {
-  AMCAT: [
-    {
-      id: '1',
-      text: 'What is your budget range?',
-      type: 'single',
-      options: [
-        { id: '1-1', text: 'Under $100' },
-        { id: '1-2', text: '$100-$500' },
-        { id: '1-3', text: '$500-$1000' },
-        { id: '1-4', text: 'Above $1000' },
-      ],
-    },
-    {
-      id: '2',
-      text: 'What features are most important to you?',
-      type: 'multiple',
-      options: [
-        { id: '2-1', text: 'Quality' },
-        { id: '2-2', text: 'Price' },
-        { id: '2-3', text: 'Brand' },
-        { id: '2-4', text: 'Warranty' },
-      ],
-    },
-  ],
   Electronics: [
     {
       id: 'e1',
@@ -55,6 +31,17 @@ const SAMPLE_QUESTIONS: Record<string, Question[]> = {
         { id: 'e2-3', text: 'Camera Quality' },
         { id: 'e2-4', text: 'Storage Capacity' },
         { id: 'e2-5', text: 'Display Quality' },
+      ],
+    },
+    {
+      id: 'e3',
+      text: 'What is your preferred brand?',
+      type: 'single',
+      options: [
+        { id: 'e3-1', text: 'Apple' },
+        { id: 'e3-2', text: 'Samsung' },
+        { id: 'e3-3', text: 'Dell' },
+        { id: 'e3-4', text: 'Other' },
       ],
     },
   ],
@@ -82,6 +69,17 @@ const SAMPLE_QUESTIONS: Record<string, Question[]> = {
         { id: 'f2-5', text: 'Material Quality' },
       ],
     },
+    {
+      id: 'f3',
+      text: 'What is your preferred size?',
+      type: 'single',
+      options: [
+        { id: 'f3-1', text: 'Small' },
+        { id: 'f3-2', text: 'Medium' },
+        { id: 'f3-3', text: 'Large' },
+        { id: 'f3-4', text: 'Extra Large' },
+      ],
+    },
   ],
   'Home & Kitchen': [
     {
@@ -107,6 +105,17 @@ const SAMPLE_QUESTIONS: Record<string, Question[]> = {
         { id: 'h2-5', text: 'Maintenance' },
       ],
     },
+    {
+      id: 'h3',
+      text: 'What is your preferred style?',
+      type: 'single',
+      options: [
+        { id: 'h3-1', text: 'Modern' },
+        { id: 'h3-2', text: 'Traditional' },
+        { id: 'h3-3', text: 'Minimalist' },
+        { id: 'h3-4', text: 'Other' },
+      ],
+    },
   ],
   Sports: [
     {
@@ -130,6 +139,17 @@ const SAMPLE_QUESTIONS: Record<string, Question[]> = {
         { id: 's2-3', text: 'Durability' },
         { id: 's2-4', text: 'Price' },
         { id: 's2-5', text: 'Brand' },
+      ],
+    },
+    {
+      id: 's3',
+      text: 'What is your skill level?',
+      type: 'single',
+      options: [
+        { id: 's3-1', text: 'Beginner' },
+        { id: 's3-2', text: 'Intermediate' },
+        { id: 's3-3', text: 'Advanced' },
+        { id: 's3-4', text: 'Professional' },
       ],
     },
   ],
