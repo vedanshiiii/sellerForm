@@ -1,7 +1,10 @@
 import { Toaster } from 'react-hot-toast';
 import SellerForm from '@/components/SellerForm';
 
-export default async function Page({ params }: { params: { productId: string } }) {
+/**
+ * @param {{ params: { productId: string } }} props
+ */
+export default async function Page({ params }) {
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
