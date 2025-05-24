@@ -212,24 +212,6 @@ export default function SellerForm() {
     });
   };
 
-  // Remove option from a custom question
-  const handleRemoveOption = (qIdx: number, oIdx: number) => {
-    const questionId = getValues(`customQuestions.${qIdx}.id`) as string;
-    const currentOptions = localOptions[questionId] || getValues(`customQuestions.${qIdx}.options`) || [];
-    const updatedOptions = currentOptions.filter((_: unknown, idx: number) => idx !== oIdx);
-    
-    // Update local state
-    setLocalOptions(prev => ({
-      ...prev,
-      [questionId]: updatedOptions
-    }));
-    
-    // Update form state
-    setValue(`customQuestions.${qIdx}.options`, updatedOptions, {
-      shouldValidate: false
-    });
-  };
-
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
     setQuestions(SAMPLE_QUESTIONS[category] || []);
